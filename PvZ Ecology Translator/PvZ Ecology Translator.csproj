@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{33DD3BE6-0C17-486C-841B-BF0916B719CB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PvZ_Ecology_Translator</RootNamespace>
+    <AssemblyName>PvZ Ecology Translator</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AssetRipper.Primitives">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\AssetRipper.Primitives.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Preloader">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Preloader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Preloader.Core">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Preloader.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Common">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Unity.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Mono">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Unity.Mono.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx.Unity.Mono.Preloader">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\BepInEx.Unity.Mono.Preloader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="HarmonyXInterop">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\HarmonyXInterop.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Mono.Security.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\MonoMod.Utils.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SemanticVersioning">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\BepInEx\core\SemanticVersioning.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel.Internals, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\System.ServiceModel.Internals.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Unity.2D.Animation.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.Animation.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.Common.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.Common.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.IK.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.IK.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.PixelPerfect">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.PixelPerfect.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.SpriteShape.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.SpriteShape.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.2D.Tilemap.Extras">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.2D.Tilemap.Extras.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Burst">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.Burst.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Burst.Unsafe">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.Burst.Unsafe.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.InternalAPIEngineBridge.001">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.InternalAPIEngineBridge.001.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.Mathematics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.ShaderLibrary">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipelines.Core.ShaderLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Universal.Shaders">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Timeline">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.Timeline.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.Antlr3.Runtime">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.VisualScripting.Antlr3.Runtime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.Core">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.VisualScripting.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.Flow">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.VisualScripting.Flow.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.VisualScripting.State">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\Unity.VisualScripting.State.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AccessibilityModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AIModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AndroidJNIModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ARModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ARModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AutoStreamingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.AutoStreamingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ClothModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterInputModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ClusterRendererModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CrashReportingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.DirectorModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.DSPGraphModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.GameCenterModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.GIModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.GIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.GridModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.GridModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.HotReloadModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.InputModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.LocalizationModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.NVIDIAModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.NVIDIAModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PerformanceReportingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ProfilerModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.RuntimeInitializeOnLoadManagerInitializerModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SharedInternalsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteMaskModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteShapeModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.StreamingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SubstanceModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.SubsystemsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.SubsystemsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainPhysicsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TextCoreFontEngineModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TextCoreTextEngineModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TilemapModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TLSModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UIElementsNativeModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIWidgetsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UIWidgetsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UmbraModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UNETModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsCommonModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityAnalyticsCommonModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityConnectModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityCurlModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityTestProtocolModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VehiclesModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VFXModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.VirtualTexturingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.WindModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.WindModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule">
+      <HintPath>D:\Games\Plants vs Zombies Collection\PvZ Ecology\植物大战僵尸生态版v0.7\植物大战僵尸生态版_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Features\AlmanacDumper.cs" />
+    <Compile Include="Features\AnimationWatcher.cs" />
+    <Compile Include="Features\CurrencyConverter.cs" />
+    <Compile Include="Features\DeveloperMenu.cs" />
+    <Compile Include="Features\Dumpers\IMGUIDumper.cs" />
+    <Compile Include="Features\Dumpers\NGUIDumper.cs" />
+    <Compile Include="Features\Dumpers\TextMeshDumper.cs" />
+    <Compile Include="Features\Dumpers\TMPDumper.cs" />
+    <Compile Include="Features\Dumpers\UGUIDumper.cs" />
+    <Compile Include="Features\GoogleTranslator.cs" />
+    <Compile Include="Features\LanguageMenu.cs" />
+    <Compile Include="Features\LanguageToggle.cs" />
+    <Compile Include="Features\PathDetector.cs" />
+    <Compile Include="Features\TextDumper.cs" />
+    <Compile Include="Features\TextureMenu.cs" />
+    <Compile Include="Managers\FontManager.cs" />
+    <Compile Include="Managers\TextureManager.cs" />
+    <Compile Include="Main.cs" />
+    <Compile Include="Managers\FileManager.cs" />
+    <Compile Include="Managers\TranslationManager.cs" />
+    <Compile Include="Patches\AnimatedImagePatch.cs" />
+    <Compile Include="Patches\ImagePatch.cs" />
+    <Compile Include="Patches\TextPatch.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
