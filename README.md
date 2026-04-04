@@ -4,109 +4,139 @@
 ![BepInEx](https://img.shields.io/badge/Requires-BepInEx_5-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge)
 
-**PvZ Ecology Translator** adalah mod canggih dan komprehensif (All-in-One) yang dibangun menggunakan kerangka BepInEx untuk game *Plants vs. Zombies: Ecological Edition*.
+**PvZ Ecology Translator** is an advanced and comprehensive (All-in-One) mod built using the BepInEx framework for the game *Plants vs. Zombies: Ecological Edition*.
 
-Mod ini tidak hanya sekadar mengubah teks, tetapi juga mampu menerjemahkan gambar (tekstur/sprite) animasi, memanipulasi tata letak UI tanpa menyentuh kode asli game, memuat font kustom, dan dilengkapi dengan alat *Developer* (In-Game Menu) yang sangat *powerful*!
+This mod goes beyond simple text replacement. It translates animated images (sprites/textures), manipulates UI layouts without touching the original game code, loads custom fonts, and features a highly *powerful* In-Game Developer Toolkit!
 
 ---
 
-## ✨ Fitur Utama (Features)
+## ✨ Key Features
 
-Mod ini dirancang dengan fleksibilitas tingkat tinggi. Segala hal yang tidak mungkin dimodifikasi sebelumnya, kini bisa diubah dengan mudah.
+Designed with ultimate flexibility, this mod allows you to modify things that were previously impossible to change.
 
-### 1. 📖 Universal Text Translation (Terjemahan Teks Cerdas)
+### 1. 📖 Universal Text Translation
 
-* Menerjemahkan teks secara *real-time* dari bahasa Mandarin ke bahasa apa pun menggunakan file JSON yang rapi (`translation_strings.json`).
-* Mendukung semua mesin teks Unity: **UGUI Text**, **TextMeshPro (TMP)**, dan **Legacy TextMesh 3D**.
-* **Regex Support:** Mendukung terjemahan teks dinamis (seperti nama pemain yang berubah-ubah, hitungan angka, dll) melalui `translation_regexs.json`.
+* Real-time text translation from Chinese to any language using clean JSON files (`translation_strings.json`).
+* Supports all Unity text engines: **UGUI Text**, **TextMeshPro (TMP)**, and **Legacy TextMesh 3D**.
+* **Regex Support:** Translate dynamic text (e.g., changing player names, wave numbers) via `translation_regexs.json`.
 
-### 2. 🖼️ Dynamic Image & Animation Translation (Terjemahan Gambar & Animasi)
+### 2. 🖼️ Dynamic Image & Animation Translation
 
-* Mengganti teks/tulisan yang menyatu dengan gambar UI (Sprite/Texture) secara *on-the-fly*.
-* **Universal Animation Watcher:** Mod dapat mendeteksi dan menimpa *frame* gambar yang sedang dianimasikan (meskipun efek partikel/ledakan tersebut tidak memiliki komponen `Animator` bawaan).
+* Replace Chinese text baked into UI images (Sprites/Textures) on-the-fly.
+* **Universal Animation Watcher:** The mod detects and intercepts animated image frames (even if the particle/explosion effects don't use a native Unity `Animator` component).
 
-### 3. 🛠️ Ultimate UI Overrides (Manipulasi UI Ekstrem)
+### 3. 🛠️ Ultimate UI Overrides
 
-Seringkali teks terjemahan lebih panjang dari aslinya dan keluar dari batas kotak. Melalui file `ui_overrides.json`, Anda bisa memodifikasi komponen UI mana pun secara instan:
+Translated text is often longer than the original and may break the UI boundaries. With `ui_overrides.json`, you can instantly modify any UI component:
 
-* **Position & Rotation:** Geser `posx`, `posy`, dan `rotation`.
-* **Scaling & RectTransform:** Atur lebar (`width`) dan tinggi (`height`) secara presisi (*Absolute Width*).
-* **Smart Typography:** Atur ukuran font (`size`), matikan pemaksaan pengecilan font (`bestfit`), dan kontrol perpotongan teks (`wrap` / `nowrap`).
+* **Position & Rotation:** Adjust `posx`, `posy`, and `rotation`.
+* **Scaling & RectTransform:** Set `width` and `height` with absolute precision.
+* **Smart Typography:** Adjust font `size`, disable forced auto-sizing (`bestfit`), and control text wrapping (`wrap` / `nowrap`).
 * **Hacking Commands:**
-  * `oneline=true` : Memaksa teks (seperti UGUI) agar tidak pernah turun ke baris baru menggunakan trik *Non-Breaking Space*.
-  * `nativesize=true` : Memaksa gambar (Image) menyesuaikan ukurannya sendiri agar tidak gepeng/distorsi.
-  * `tabsize=X` : Mengubah karakter tab `\t` menjadi *X* buah spasi biasa untuk perataan kolom teks (*cheat menu*) yang sempurna.
+  * `oneline=true` : Forces text (like UGUI) to stay on a single line by injecting *Non-Breaking Spaces*.
+  * `nativesize=true` : Forces images to adapt to their original resolution to prevent distortion/stretching.
+  * `tabsize=X` : Converts `\t` tab characters into *X* normal spaces for perfect column/table alignments (e.g., in cheat menus).
 
-### 4. 📗 Smart Almanac Dumper & Formatter (Otomatisasi Almanak)
+### 4. 📗 Smart Almanac Dumper & Formatter
 
-* **Auto-Indent (Hanging Indent):** Secara otomatis merapikan teks deskripsi Almanak (Tanaman & Zombie) yang memiliki tanda titik dua (`:`). Teks yang turun ke baris baru akan sejajar sempurna layaknya tabel!
-* **Auto Dumper:** Mengekstrak teks dari buku Almanak langsung menjadi format JSON siap terjemah.
+* **Auto-Indent (Hanging Indent):** Automatically aligns Almanac descriptions (Plants & Zombies) containing colons (`:`), making them look like perfectly formatted tables!
+* **Auto Dumper:** Extracts text directly from the in-game Almanac into ready-to-translate JSON formats.
 
-### 5. 🔠 Custom Font Loader (Mod Font)
+### 5. 🔠 Custom Font Loader
 
-* Memuat file font kustom Anda sendiri (`.ttf`, `.otf`, atau `.bundle` Unity Asset) untuk menggantikan font default game agar mendukung berbagai karakter bahasa (misal: alfabet Latin, Cyrillic, dll).
-* Font akan diaplikasikan ke UGUI, TextMesh, dan TextMeshPro secara bersamaan.
+* Load your own custom fonts (`.ttf`, `.otf`, or Unity `.bundle` assets) to replace the game's default font, ensuring support for various character sets (Latin, Cyrillic, etc.).
+* Fonts are recursively applied to UGUI, TextMesh, and TextMeshPro.
 
 ### 6. 🧰 In-Game Developer Toolkit (F12 Menu)
 
-Tekan **F12** di dalam game untuk memunculkan panel GUI khusus *Developer*:
+Press **F12** in-game to open a dedicated Developer GUI panel:
 
-* **Hot-Reload (F5 & F6):** Memuat ulang file JSON dan Gambar PNG secara langsung saat game berjalan tanpa perlu *restart* game!
-* **Absolute Screen-Space Scanner (Ctrl + Klik Kanan):** Arahkan *mouse* ke teks/gambar apa pun di layar dan tekan Ctrl+Klik Kanan. Mod akan mencetak "Jalur (Path)", "Ukuran", dan "Teks" asli dari objek tersebut ke konsol, menembus lapisan pelindung (*Raycast Blockers*) dari developer aslinya!
-* **Live Settings:** Mengatur jarak Indent Almanak, saklar Auto-Translate (Google API), Konversi Mata Uang Otomatis, dan fitur lainnya.
+* **Hot-Reload (F5 & F6):** Reload JSON files and custom PNG images instantly while the game is running without restarting!
+* **Absolute Screen-Space Scanner (Ctrl + Right Click):** Hover your mouse over any text/image and press Ctrl+Right Click. The mod will print its exact "Path", "Size", and original "Text" to the console, bypassing the developers' Raycast Blockers!
+* **Live Settings:** Adjust Almanac indent spacing, toggle Google API Auto-Translate, real-time Currency Conversion, and more.
 
 ---
 
-## 🌍 Bahasa yang Tersedia (Included Translations)
+## 🌍 Included Translations
 
-Dalam file rilis `.zip`, sudah disematkan mod `.dll` beserta folder terjemahan yang sudah selesai dikerjakan. Saat ini, bahasa bawaan yang sudah siap digunakan adalah:
-* us **English**
+The release `.zip` file includes the `.dll` mod along with pre-configured translation folders. The currently available default languages are:
+* 🇬🇧 **English**
 * 🇮🇩 **Indonesian**
 
-> **Ingin me-request bahasa lain?** Silakan ajukan *request* dengan menghubungi saya via DM di Discord!
+> **Want to request another language?** Feel free to request it by sending me a DM on Discord!
 
 ---
 
-## 📥 Panduan Instalasi (Installation Guide)
+## 📥 Installation Guide
 
-Untuk menggunakan mod ini, kamu memerlukan game aslinya dan **BepInEx 5**, yang merupakan program pemuat mod (Mod Loader) standar untuk game berbasis Unity.
+To use this mod, you need the base game and **BepInEx 5** (the standard Unity mod loader).
 
-### Langkah 1: Mengunduh Game PvZ Ecology
+### Step 1: Downloading the Game
 
-Jika kamu belum memiliki gamenya, kamu bisa mengunduhnya secara gratis melalui komunitas Discord resmi/terkait:
-1. Bergabunglah dengan server Discord melalui tautan ini: **[Join Discord PvZ Ecology](https://discord.gg/AeSQTQGG)**
-2. Setelah bergabung, kunjungi *channel* unduhan ini untuk mendapatkan file game terbaru: **[Link Channel Unduhan Game](https://discord.com/channels/1350949592866361394/1350954749259812895)**
-3. Ekstrak file game yang sudah diunduh ke dalam sebuah folder di PC kamu.
+If you don't have the game yet, you can download it for free via the official/related Discord community:
+1. Join the PvZ Ecology Discord server here: **[Join Discord PvZ Ecology](https://discord.gg/AeSQTQGG)**
+2. Once joined, visit this download channel to get the latest game files: **[Game Download Channel Link](https://discord.com/channels/1350949592866361394/1350954749259812895)**
+3. Extract the downloaded game files into a folder on your PC.
 
-### Langkah 2: Memasang BepInEx
+### Step 2: Installing BepInEx
 
-1. Unduh BepInEx versi 5 (x86 atau x64, sesuaikan dengan bit game PvZ Ecology Anda) dari [Halaman Rilis GitHub BepInEx](https://github.com/BepInEx/BepInEx/releases).
-2. Ekstrak file `.zip` yang sudah diunduh.
-3. Pindahkan isi ekstraksi (folder `BepInEx`, file `doorstop_config.ini`, dan file `winhttp.dll`) ke dalam folder utama game Anda (folder yang sama dengan file `.exe` PvZ Ecology).
-4. **Jalankan game-nya satu kali.** Game akan memunculkan konsol hitam (jendela CMD). Tunggu sampai game masuk ke Main Menu, lalu tutup gamenya. *(Langkah ini wajib agar BepInEx membuat folder-folder konfigurasi otomatis).*
+1. Download BepInEx version 5 (x86 or x64, matching your game's architecture) from the [BepInEx GitHub Releases page](https://github.com/BepInEx/BepInEx/releases).
+2. Extract the downloaded `.zip` file.
+3. Move the extracted contents (`BepInEx` folder, `doorstop_config.ini`, and `winhttp.dll`) into your game's root directory (the same folder as the PvZ Ecology `.exe`).
+4. **Run the game once.** The game will show a black console window. Wait until you reach the Main Menu, then close the game. *(This step is required so BepInEx can generate its configuration folders).*
 
-### Langkah 3: Memasang Mod Translator
+### Step 3: Installing the Translator Mod
 
-1. Unduh file rilis `.zip` terbaru dari menu **[Releases]** di sebelah kanan halaman GitHub ini.
-2. Ekstrak isi file `.zip` tersebut.
-3. Buka folder game Anda, lalu arahkan ke: `BepInEx/plugins/`
-4. Pindahkan file `PvZEcologyTranslator.dll` beserta folder `PvZ Ecology Translator` (yang berisi data terjemahan English & Indonesian) ke dalam folder `plugins` tersebut.
-5. Jalankan gamenya! (Struktur *folder* *dump* dan lainnya akan dibuat secara otomatis saat game dimuat).
-
----
-
-## ⌨️ Cara Penggunaan Cepat (Quick Start)
-
-* **Menambah Terjemahan Teks:** Buka `BepInEx/plugins/PvZ Ecology Translator/Localization/Indonesian/Strings/translation_strings.json`. Tulis teks Mandarin di kiri, dan terjemahanmu di kanan. Simpan, lalu tekan **F5** di dalam game.
-* **Menambah Gambar Mod:** Letakkan file PNG buatanmu di folder `Textures/`. Nama file PNG harus sama persis dengan nama gambar aslinya di game (kamu bisa mengecek nama aslinya menggunakan fitur *Dumper* atau *Ctrl+Klik Kanan*). Tekan **F6** di dalam game untuk memuat gambarnya.
-* **Membuka Menu Mod:** Tekan **F12** kapan saja di dalam game.
-* **Mencari Jalur (Path) untuk UI Overrides:** Arahkan mouse ke tombol/teks yang berantakan, tahan tombol **Ctrl Kiri**, lalu **Klik Kanan**. Buka layar konsol BepInEx hitam, dan salin `Path` yang tertera di sana untuk ditempel ke `ui_overrides.json`.
+1. Download the latest `.zip` release file from the **[Releases]** section on the right side of this GitHub page.
+2. Extract the contents of the `.zip` file.
+3. Open your game folder and navigate to: `BepInEx/plugins/`
+4. Move the `PvZEcologyTranslator.dll` and the `PvZ Ecology Translator` folder (which contains the English & Indonesian translations) into the `plugins` folder.
+5. Run the game! (Dump folders and configurations will be created automatically).
 
 ---
 
+## ⌨️ Quick Start Guide
+
+* **Adding Text Translations:** Open `BepInEx/plugins/PvZ Ecology Translator/Localization/English/Strings/translation_strings.json`. Write the Chinese text on the left, and your translation on the right. Save it, then press **F5** in-game.
+* **Adding Custom Images:** Place your custom PNG files in the `Textures/` folder. The file name must exactly match the original game sprite name (use the Scanner/Dumper to find the original names). Press **F6** in-game to load them.
+* **Opening the Mod Menu:** Press **F12** anytime in-game.
+* **Finding Paths for UI Overrides:** Hover over a messy text/button, hold **Left Ctrl**, and **Right-Click**. Open the black BepInEx console, copy the printed `Path`, and paste it into your `ui_overrides.json`.
+
+---
+
+## 📸 Screenshots
+### English Version
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/bbdb110f-788f-4852-b29d-630f88e634a2" alt="Screenshot 1"></td>
+    <td><img src="https://github.com/user-attachments/assets/d2b33628-0822-46ed-af00-81bfb2b0ecd6" alt="Screenshot 2"></td>
+    <td><img src="https://github.com/user-attachments/assets/ace371b1-e3e5-41d9-9d29-08ca74dc6e46" alt="Screenshot 3"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/8881c8e6-22e2-4126-8798-49ebdf6476ef" alt="Screenshot 4"></td>
+    <td><img src="https://github.com/user-attachments/assets/4f5bb861-30c8-4682-a62c-70c02082084a" alt="Screenshot 5"></td>
+    <td></td>
+  </tr>
+</table>
+
+### Indonesian Version
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/ff5f88b8-53ab-4c74-8fd5-9ea76dd69634" alt="Screenshot 1"></td>
+    <td><img src="https://github.com/user-attachments/assets/75dbc83e-dc11-4787-945f-3ec8ff266a09" alt="Screenshot 2"></td>
+    <td><img src="https://github.com/user-attachments/assets/225d7b2f-acfb-4236-a61f-81ce3f37ab4d" alt="Screenshot 3"></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/80c97eba-52a5-472a-9b36-f2d9ce622e0f" alt="Screenshot 4"></td>
+    <td><img src="https://github.com/user-attachments/assets/b64a117d-9260-4b5b-9760-2d54983e327b" alt="Screenshot 5"></td>
+    <td></td>
+  </tr>
+</table>
 ## 👨‍💻 Credits
 
-* **Author/Developer:** [Ilham Gimank / Ilham Nurjaman]
-* Mod ini dibuat dengan dedikasi tinggi untuk komunitas *Plants vs. Zombies Ecological Edition*.
+---
 
-Selamat menerjemahkan dan memodifikasi! 🧟‍♂️🌱
+* **Author/Developer:** [Ilham Gimank / Ilham Nurjaman]
+* This mod is created with high dedication to the *Plants vs. Zombies: Ecological Edition* community.
+
+Happy translating and modding! 🧟‍♂️🌱
