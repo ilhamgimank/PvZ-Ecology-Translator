@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0031, IDE0044, IDE0051, IDE0079 // Membungkam pesan Object Initialization, Unnecessary ReadOnly, Unused Private Member, dan Unnecessary Suppression
+﻿#pragma warning disable IDE0044 // Membungkam pesan Object Initialization dan Null Check
 using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +25,12 @@ namespace PvZEcologyTranslator.Managers
             CachedTranslatedSprites.Clear();
 
             string langFolder = PvZEcologyTranslator.Features.LanguageMenu.CurrentLanguage;
-            string texturesPath = Path.Combine(FileManager.LocalizationFolder, langFolder, "Textures");
+
+            // [UPDATE] Tentukan folder berdasarkan status EnableImageTranslation
+            // true = Modded (Localization folder), false = Original (Default Textures folder)
+            string texturesPath = EnableImageTranslation
+                ? Path.Combine(FileManager.LocalizationFolder, langFolder, "Textures")
+                : Path.Combine(FileManager.DefaultTexturesFolder, langFolder);
 
             if (Directory.Exists(texturesPath))
             {
@@ -47,8 +52,8 @@ namespace PvZEcologyTranslator.Managers
             // Hentikan perhitungan waktu
             sw.Stop();
 
-            // Cetak log menggunakan bahasa Inggris sesuai standar, lengkap dengan keterangan waktunya
-            Main.Log.LogInfo($"[Texture] Loaded: {CustomTextures.Count} Textures in {sw.ElapsedMilliseconds} ms.");
+            string modeName = EnableImageTranslation ? "Modded" : "Original";
+            Main.Log.LogInfo($"[Texture] Loaded: {CustomTextures.Count} {modeName} Textures in {sw.ElapsedMilliseconds} ms from {texturesPath}.");
         }
 
         public static Sprite GetTranslatedSprite(Sprite originalSprite, string cleanName)

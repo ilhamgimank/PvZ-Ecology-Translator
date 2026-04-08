@@ -10,12 +10,12 @@ using PvZEcologyTranslator.Features;
 
 namespace PvZEcologyTranslator
 {
-    // [UPDATE VERSI 0.14.7] Penambahan Pengatur Ukuran Tab (tabsize) di UI Overrides (+0.01)
+    // [UPDATE VERSI 0.14.8] Penambahan Fitur Toggle Console CMD (Windows API) (+0.01)
     [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", ModVersion)]
     public class Main : BaseUnityPlugin
     {
         // Tetapkan versi mod di sini!
-        public const string ModVersion = "0.14.7";
+        public const string ModVersion = "0.14.8";
 
         internal static Main Instance;
         public static ManualLogSource Log;

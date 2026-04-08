@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0031, IDE0044
+﻿#pragma warning disable IDE0031 
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -206,12 +206,8 @@ namespace PvZEcologyTranslator.Features
             TextureManager.EnableImageTranslation = isModded;
             Main.SaveConfigs();
 
-            // [FITUR BARU 0.10.0] Memuat ulang (reload) tekstur dari disk SECARA OTOMATIS saat digeser ke Modded!
-            // Kini kamu tidak perlu pencet F6 lagi setelah menaruh gambar baru ke folder terjemahan.
-            if (isModded)
-            {
-                TextureManager.LoadCustomSprites();
-            }
+            // [UPDATE] Selalu muat ulang tekstur dari disk saat digeser, entah ke Modded atau Original
+            TextureManager.LoadCustomSprites();
 
             UpdateTextureButtonText();
             ImagePatch.RefreshAllImages();

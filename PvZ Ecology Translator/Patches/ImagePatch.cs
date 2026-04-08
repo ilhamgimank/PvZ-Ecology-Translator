@@ -100,25 +100,24 @@ namespace PvZEcologyTranslator.Patches
                 TextureManager.DumpSprite(value);
             }
 
-            if (TextureManager.EnableImageTranslation)
+            // [UPDATE] Hapus batasan if (TextureManager.EnableImageTranslation)
+            // Karena sekarang kita selalu memuat tekstur ke memori sesuai mode yang dipilih (Modded/Original)
+            string lookupName = value.name;
+            Sprite refSprite = value;
+
+            if (isRefresh && comp != null && OriginalSpriteCache.TryGetValue(comp, out Sprite orig) && orig != null)
             {
-                string lookupName = value.name;
-                Sprite refSprite = value;
+                lookupName = orig.name;
+                refSprite = orig;
+            }
 
-                if (isRefresh && comp != null && OriginalSpriteCache.TryGetValue(comp, out Sprite orig) && orig != null)
-                {
-                    lookupName = orig.name;
-                    refSprite = orig;
-                }
+            if (lookupName.EndsWith("_Translated")) lookupName = lookupName.Replace("_Translated", "");
+            string cleanName = lookupName.Replace("(Clone)", "").Trim();
 
-                if (lookupName.EndsWith("_Translated")) lookupName = lookupName.Replace("_Translated", "");
-                string cleanName = lookupName.Replace("(Clone)", "").Trim();
-
-                Sprite customSprite = TextureManager.GetTranslatedSprite(refSprite, cleanName);
-                if (customSprite != null)
-                {
-                    value = customSprite;
-                }
+            Sprite customSprite = TextureManager.GetTranslatedSprite(refSprite, cleanName);
+            if (customSprite != null)
+            {
+                value = customSprite;
             }
 
             if (DeveloperMenu.EnableUIOverrides && comp != null)

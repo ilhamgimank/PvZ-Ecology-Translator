@@ -1,8 +1,9 @@
-﻿#pragma warning disable IDE0031, IDE0079 // Membungkam pesan Null Check dan Unnecessary Suppression
+﻿#pragma warning disable IDE0031, IDE0079
 
 using UnityEngine;
 using PvZEcologyTranslator.Managers;
 using PvZEcologyTranslator.Patches;
+using System.Runtime.InteropServices; // [NEW FEATURE] Required to call Windows API
 
 namespace PvZEcologyTranslator.Features
 {
@@ -16,11 +17,13 @@ namespace PvZEcologyTranslator.Features
 
         public static bool EnableAlmanacTranslation = true;
         public static bool AutoIndentAlmanac = true;
-        // [FITUR BARU 0.13.7] Variabel UI untuk pengatur jarak Auto Indent
         public static float AutoIndentMultiplier = 0.40f;
 
         public static bool EnableAlmanacDumper = false;
         public static bool AlmanacZombieMode = false;
+
+        // [NEW FEATURE] CMD console visibility status
+        public static bool IsConsoleVisible = true;
 
         public static string GoogleTargetLang = "en";
         private readonly string[] targetLangCodes = { "ar", "en", "id", "ja", "ko", "ms", "ru", "es", "su" };
@@ -43,6 +46,35 @@ namespace PvZEcologyTranslator.Features
         private int plantDumpCount = 0;
         private int zombieDumpCount = 0;
         private float statusUpdateTimer = 0f;
+
+        // =========================================================
+        // [NEW FEATURE] WINDOWS API FOR CMD CONSOLE
+        // =========================================================
+        [DllImport("kernel32.dll")]
+        private static extern System.IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(System.IntPtr hWnd, int nCmdShow);
+
+        private const int SW_HIDE = 0;
+        private const int SW_SHOW = 5;
+
+        public static void SetConsoleVisibility(bool show)
+        {
+            try
+            {
+                System.IntPtr handle = GetConsoleWindow();
+                if (handle != System.IntPtr.Zero)
+                {
+                    ShowWindow(handle, show ? SW_SHOW : SW_HIDE);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Main.Log.LogWarning($"[Console] Failed to change console visibility: {ex.Message}");
+            }
+        }
+        // =========================================================
 
         void Update()
         {
@@ -80,7 +112,7 @@ namespace PvZEcologyTranslator.Features
 
         private void ReloadTexturesCommand()
         {
-            Main.Log.LogInfo("[Command] Memuat ulang tekstur kustom dari file PNG...");
+            Main.Log.LogInfo("[Command] Reloading custom textures from PNG files...");
             TextureManager.LoadCustomSprites();
             ImagePatch.RefreshAllImages();
             LanguageMenu.CreateNotificationUI("Texture Reloaded!", Color.green);
@@ -185,6 +217,16 @@ namespace PvZEcologyTranslator.Features
             GUILayout.Button("Manual\nHook Text [F7]", GUILayout.Height(40));
             GUILayout.EndHorizontal();
             GUI.enabled = true;
+
+            // [NEW FEATURE] Toggle BepInEx Console
+            GUILayout.Space(10);
+            bool prevConsoleState = IsConsoleVisible;
+            IsConsoleVisible = DrawToggle("Show Console (CMD) Window", IsConsoleVisible);
+            if (IsConsoleVisible != prevConsoleState)
+            {
+                SetConsoleVisibility(IsConsoleVisible);
+            }
+
             GUILayout.EndVertical();
             GUILayout.Space(10);
 
@@ -212,7 +254,6 @@ namespace PvZEcologyTranslator.Features
                 TextPatch.RefreshAllTexts();
             }
 
-            // [FITUR BARU 0.13.7] Tombol plus-minus untuk mengatur jarak indentasi
             if (AutoIndentAlmanac)
             {
                 GUILayout.BeginHorizontal();
@@ -247,11 +288,12 @@ namespace PvZEcologyTranslator.Features
             GUILayout.BeginVertical("box");
             DrawSectionHeader("---- Image & Texture Settings ----");
             bool prevImageState = TextureManager.EnableImageTranslation;
-            TextureManager.EnableImageTranslation = DrawToggle("1. Texture Translation", TextureManager.EnableImageTranslation);
+            TextureManager.EnableImageTranslation = DrawToggle("1. Use Modded Textures", TextureManager.EnableImageTranslation);
             if (TextureManager.EnableImageTranslation != prevImageState)
             {
                 Main.SaveConfigs();
-                if (TextureManager.EnableImageTranslation) TextureManager.LoadCustomSprites();
+                // [UPDATE] Selalu reload textures ketika toggle berubah
+                TextureManager.LoadCustomSprites();
                 ImagePatch.RefreshAllImages();
             }
             GUILayout.Space(5);

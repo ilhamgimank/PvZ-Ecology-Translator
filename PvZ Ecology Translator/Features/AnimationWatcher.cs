@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0017, IDE0270 // Membungkam pesan Object Initialization dan Null Check
+﻿#pragma warning disable IDE0017, IDE0270, IDE0079 // Membungkam pesan Object Initialization dan Null Check
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,7 +24,8 @@ namespace PvZEcologyTranslator.Features
         // Berjalan di detik-detik terakhir sebelum frame digambar ke layar (monitor)
         void LateUpdate()
         {
-            if (!TextureManager.EnableImageTranslation) return;
+            // [UPDATE] Dihapus if (!TextureManager.EnableImageTranslation) return; 
+            // agar efek animasi ledakan juga membaca tekstur dari folder Original ([Default Textures])
 
             if (img != null && img.sprite != null)
             {
