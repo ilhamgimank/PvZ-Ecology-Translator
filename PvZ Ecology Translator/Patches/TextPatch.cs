@@ -370,6 +370,17 @@ namespace PvZEcologyTranslator.Patches
                     if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
                     continue;
                 }
+                // [FITUR BARU] Scale Override: Senjata pamungkas penembus Layout Group & Mask
+                else if (key == "scalex" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sx))
+                {
+                    comp.transform.localScale = new Vector3(sx, comp.transform.localScale.y, comp.transform.localScale.z);
+                    continue;
+                }
+                else if (key == "scaley" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sy))
+                {
+                    comp.transform.localScale = new Vector3(comp.transform.localScale.x, sy, comp.transform.localScale.z);
+                    continue;
+                }
 
                 if (comp is Text uiText)
                 {
@@ -377,6 +388,9 @@ namespace PvZEcologyTranslator.Patches
                     else if (key == "bestfit" && bool.TryParse(val, out bool bf)) uiText.resizeTextForBestFit = bf;
                     else if (key == "maxsize" && int.TryParse(val, out int maxs)) uiText.resizeTextMaxSize = maxs;
                     else if (key == "minsize" && int.TryParse(val, out int mins)) uiText.resizeTextMinSize = mins;
+
+                    // [FITUR BARU] Vertical Overflow: Mencegah teks terpotong secara vertikal
+                    else if (key == "voverflow" && bool.TryParse(val, out bool vo)) uiText.verticalOverflow = vo ? VerticalWrapMode.Overflow : VerticalWrapMode.Truncate;
 
                     else if (key == "nowrap" && bool.TryParse(val, out bool nw))
                     {

@@ -10,12 +10,12 @@ using PvZEcologyTranslator.Features;
 
 namespace PvZEcologyTranslator
 {
-    // [UPDATE VERSI 0.14.8] Penambahan Fitur Toggle Console CMD (Windows API) (+0.01)
+    // [UPDATE VERSI 0.14.9] Perbaikan Scrollbar UI Developer Menu
     [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", ModVersion)]
     public class Main : BaseUnityPlugin
     {
-        // Tetapkan versi mod di sini!
-        public const string ModVersion = "0.14.8";
+        // Variabel versi mod. Mengubah angka di sini akan otomatis mengubah tampilan di dalam game!
+        public const string ModVersion = "0.14.9";
 
         internal static Main Instance;
         public static ManualLogSource Log;

@@ -172,7 +172,10 @@ namespace PvZEcologyTranslator.Features
             if (GUI.Button(new Rect(windowRect.width - 30, 2, 25, 20), "X")) IsOpen = false;
 
             GUILayout.Space(10);
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, false);
+
+            // [UPDATE] Menghapus parameter (false, false) agar Scrollbar vertikal otomatis muncul
+            // jika kontennya melebihi tinggi menu!
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
             GUILayout.BeginVertical("box");
             GUILayout.BeginHorizontal();
@@ -417,6 +420,27 @@ namespace PvZEcologyTranslator.Features
 
             GUILayout.EndVertical();
             GUILayout.Space(10);
+
+            // =========================================================
+            // [NEW FEATURE] TOMBOL DONASI LANGSUNG DI IN-GAME MENU
+            // =========================================================
+            GUILayout.BeginVertical("box");
+            DrawSectionHeader("---- Support Modder ----");
+            GUILayout.Label("Love the mod? You can support my work here:", new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Italic });
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Saweria", GUILayout.Height(30)))
+            {
+                Application.OpenURL("https://saweria.co/ilhamgimank");
+            }
+            if (GUILayout.Button("SociaBuzz", GUILayout.Height(30)))
+            {
+                Application.OpenURL("https://sociabuzz.com/ilhamgimank/tribe");
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+            GUILayout.Space(10);
+            // =========================================================
 
             GUILayout.BeginVertical("box");
             DrawSectionHeader("---- Status ----");
