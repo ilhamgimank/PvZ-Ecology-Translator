@@ -10,19 +10,27 @@ using System.Globalization;
 
 namespace PvZEcologyTranslator.Patches
 {
+    // Kelas utama yang bertugas mencegat (hook) semua teks yang akan muncul di layar game
     public static class TextPatch
     {
+        // Penanda agar sistem tidak melakukan looping terjemahan secara terus-menerus
         public static bool IsApplyingTranslation = false;
 
+        // --- SISTEM CACHE MEMORI ---
+        // Menyimpan teks asli bawaan game agar bisa dikembalikan saat refresh (F5)
         public static Dictionary<Component, string> OriginalTextCache = new Dictionary<Component, string>();
+        // Menyimpan kamus kebalikan (Terjemahan -> Asli) untuk keperluan Almanac Dumper
         public static Dictionary<string, string> ReverseTranslationCache = new Dictionary<string, string>();
+        // Menyimpan teks yang sudah diterjemahkan agar tidak perlu diproses ulang (menghemat CPU)
         public static HashSet<string> TranslatedTextCache = new HashSet<string>();
 
         private static int lastDictCount = -1;
 
+        // Variabel untuk menahan spam notifikasi "Achievement" agar tidak muncul berkali-kali
         private static string lastAchievementNotif = "";
         private static float lastAchievementTime = 0f;
 
+        // Memperbarui kamus kebalikan jika ada perubahan jumlah kosakata di TranslationManager
         private static void UpdateReverseCache()
         {
             if (TranslationManager.Translations != null && lastDictCount != TranslationManager.Translations.Count)
@@ -31,6 +39,7 @@ namespace PvZEcologyTranslator.Patches
             }
         }
 
+        // Membangun ulang kamus kebalikan (Terjemahan sebagai Key, Asli sebagai Value)
         public static void RebuildReverseCache()
         {
             ReverseTranslationCache.Clear();
@@ -47,10 +56,12 @@ namespace PvZEcologyTranslator.Patches
             lastDictCount = TranslationManager.Translations?.Count ?? 0;
         }
 
+        // Fungsi yang dipanggil oleh Main.cs untuk memasang "Alat Sadap" (Patch) ke dalam mesin Unity
         public static void PatchAll(Harmony harmony)
         {
             try
             {
+                // 1. Membajak UGUI Text bawaan Unity lawas
                 var setter = AccessTools.PropertySetter(typeof(Text), "text");
                 harmony.Patch(setter, prefix: new HarmonyMethod(typeof(TextPatch), nameof(UGUI_Prefix)));
 
@@ -70,6 +81,7 @@ namespace PvZEcologyTranslator.Patches
 
             try
             {
+                // 2. Membajak TextMesh 3D lawas (biasanya dipakai untuk teks di dunia 3D/Zombies)
                 var setter = AccessTools.PropertySetter(typeof(TextMesh), "text");
                 harmony.Patch(setter, prefix: new HarmonyMethod(typeof(TextPatch), nameof(TextMesh_Prefix)));
                 Main.Log.LogInfo("[Hook] TextMesh hook applied.");
@@ -78,6 +90,7 @@ namespace PvZEcologyTranslator.Patches
 
             try
             {
+                // 3. Membajak TextMeshPro (TMP) menggunakan metode Reflection agar tidak error jika game tidak punya TMP
                 System.Type tmpType = AccessTools.TypeByName("TMPro.TMP_Text");
                 if (tmpType != null)
                 {
@@ -95,16 +108,19 @@ namespace PvZEcologyTranslator.Patches
             catch { }
         }
 
+        // --- KUMPULAN PREFIX (Fungsi yang berjalan tepat sebelum teks muncul di layar) ---
         private static void UGUI_Prefix(Text __instance, ref string value) => ProcessGeneric(__instance, ref value, "UGUI");
         private static void TextMesh_Prefix(TextMesh __instance, ref string value) => ProcessGeneric(__instance, ref value, "TextMesh");
         private static void TMP_Prefix(object __instance, ref string value) => ProcessGeneric(__instance as Component, ref value, "TextMeshPro");
         private static void NGUI_Prefix(object __instance, ref string value) => ProcessGeneric(__instance as Component, ref value, "NGUI");
 
+        // --- KUMPULAN POSTFIX (Fungsi yang berjalan setelah komponen diaktifkan / Enable) ---
         private static void UGUI_OnEnable_Postfix(Text __instance)
         {
             if (__instance == null || string.IsNullOrEmpty(__instance.text)) return;
             string val = __instance.text;
 
+            // Memanggil teks asli dari cache jika objek ini pernah direkam sebelumnya
             if (OriginalTextCache.TryGetValue(__instance, out string cached))
             {
                 val = cached;
@@ -145,12 +161,18 @@ namespace PvZEcologyTranslator.Patches
             }
         }
 
+        // =========================================================================
+        // JANTUNG UTAMA MOD: Fungsi yang memproses semua logika terjemahan teks
+        // =========================================================================
         private static void ProcessGeneric(Component comp, ref string value, string typeLabel, bool isRefresh = false)
         {
+            // Abaikan teks kosong atau teks yang sedang kita manipulasi
             if (string.IsNullOrWhiteSpace(value) || IsApplyingTranslation) return;
 
+            // Abaikan UI Notifikasi bawaan mod kita agar tidak ikut diterjemahkan
             if (comp != null && comp.gameObject.name == "NotifText") return;
 
+            // Abaikan teks UI Menu Developer (F12)
             if (value.Contains("Enable ") || value.Contains("Disabled") || value.Contains("Enabled") ||
                 value.Contains("Mod Version") || value.Contains("PvZ Ecology") || value.Contains("Active Language"))
             {
@@ -159,16 +181,20 @@ namespace PvZEcologyTranslator.Patches
 
             UpdateReverseCache();
 
+            // Jika teks yang masuk ternyata adalah teks hasil terjemahan, kembalikan ke teks aslinya
+            // Ini sangat penting agar Almanak Dumper tetap bisa mengekstrak nama Mandarin aslinya
             if (ReverseTranslationCache.TryGetValue(value, out string trueOriginal))
             {
                 value = trueOriginal;
             }
 
+            // Simpan teks asli ke dalam memori Cache
             if (!isRefresh && comp != null)
             {
                 OriginalTextCache[comp] = value;
             }
 
+            // --- DETEKSI BUKU ALMANAK ---
             bool isAlmanac = false;
             if (comp != null)
             {
@@ -186,21 +212,25 @@ namespace PvZEcologyTranslator.Patches
                 if (!isAlmanac && comp.gameObject.scene.name != null && comp.gameObject.scene.name.ToLower().Contains("almanac")) isAlmanac = true;
             }
 
+            // Buang teks yang belum terjemah ke Dumps Folder (Kecuali Almanak, karena punya Dumper sendiri)
             if (DeveloperMenu.EnableDumpedText && !isAlmanac)
             {
                 TextDumper.DumpText(value, typeLabel);
             }
 
+            // Jika toggle terjemahan dimatikan (Alt+T), hentikan proses di sini
             if (!LanguageToggle.IsTranslationEnabled) return;
 
             string originalTextForReverse = value;
             bool wasTranslated = false;
 
+            // 1. Cek di kamus utama (translation_strings.json)
             if (TranslationManager.Translations.ContainsKey(value))
             {
                 value = TranslationManager.Translations[value];
                 wasTranslated = true;
             }
+            // 2. Cek di kamus dinamis Regex (translation_regexs.json)
             else if (DeveloperMenu.EnableRegex && TranslationManager.RegexTranslations.Count > 0)
             {
                 foreach (var regexEntry in TranslationManager.RegexTranslations)
@@ -214,22 +244,24 @@ namespace PvZEcologyTranslator.Patches
                             {
                                 string groupVal = m.Groups[i].Value;
 
+                                // Terjemahkan variabel grup jika ada di kamus utama
                                 if (TranslationManager.Translations.TryGetValue(groupVal, out string translatedGroupVal))
                                 {
                                     groupVal = translatedGroupVal;
                                 }
 
+                                // Format {0} atau $1
                                 result = result.Replace("{" + (i - 1).ToString() + "}", groupVal);
                                 result = result.Replace("$" + i.ToString(), groupVal);
                             }
 
+                            // Sistem Notifikasi Achievement Otomatis
                             if (!IsApplyingTranslation && !isRefresh && regexEntry.Key.Contains("成就"))
                             {
                                 if (result != lastAchievementNotif || Time.unscaledTime - lastAchievementTime > 2f)
                                 {
                                     lastAchievementNotif = result;
                                     lastAchievementTime = Time.unscaledTime;
-
                                     Features.LanguageMenu.CreateNotificationUI("🏆 " + result, new Color(1f, 0.84f, 0f));
                                 }
                             }
@@ -241,8 +273,10 @@ namespace PvZEcologyTranslator.Patches
                     }
                 }
             }
+            // 3. Terjemahan Otomatis via Google Translate API
             else if (DeveloperMenu.EnableAutoTranslate)
             {
+                // Abaikan jika isinya cuma angka atau simbol agar Google tidak capek
                 if (!System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), @"^\d+\s*(fps|FPS)?$") &&
                     !System.Text.RegularExpressions.Regex.IsMatch(value.Trim(), @"^[0-9./\\]+$"))
                 {
@@ -250,6 +284,7 @@ namespace PvZEcologyTranslator.Patches
                 }
             }
 
+            // 4. Konversi Mata Uang Cerdas
             if (CurrencyConverter.EnableConversion && value.Contains("$"))
             {
                 string convertedCurrency = CurrencyConverter.ConvertString(value, LanguageMenu.CurrentLanguage);
@@ -260,6 +295,7 @@ namespace PvZEcologyTranslator.Patches
                 }
             }
 
+            // --- SISTEM PEMUAT FONT KUSTOM ---
             if (FontManager.IsFontLoaded)
             {
                 if (FontManager.CustomFont != null)
@@ -294,23 +330,27 @@ namespace PvZEcologyTranslator.Patches
                 }
             }
 
+            // --- EKSEKUSI UI OVERRIDES ---
             if (DeveloperMenu.EnableUIOverrides && comp != null)
             {
                 string objPath = PathDetector.GetPath(comp.transform);
                 if (TranslationManager.UIOverrides.TryGetValue(objPath, out string overrideData))
                 {
-                    // [UPDATE 0.14.5] Sekarang kita lempar "ref value" ke fungsi ini agar teksnya bisa dimanipulasi!
                     ApplyUIOverrides(comp, overrideData, ref value);
-                    wasTranslated = true;
+                    wasTranslated = true; // Anggap sebagai terjemahan agar masuk ke ReverseCache
                 }
             }
 
+            // Menyimpan teks ke Reverse Cache jika berhasil diproses
             if (wasTranslated)
             {
                 ReverseTranslationCache[value] = originalTextForReverse;
             }
         }
 
+        // =========================================================================
+        // EKSEKUTOR UI OVERRIDES & OPSI NUKLIR (Senjata Modifikasi Layout)
+        // =========================================================================
         private static void ApplyUIOverrides(Component comp, string overrideData, ref string textValue)
         {
             string[] props = overrideData.Split(';');
@@ -324,7 +364,25 @@ namespace PvZEcologyTranslator.Patches
                 string key = kvp[0].Trim().ToLower();
                 string val = kvp[1].Trim().ToLower();
 
-                // [FITUR BARU 0.14.5] Ultimate Hack OneLine! (Mengganti Spasi dengan Non-Breaking Space)
+                // 💣 [OPSI NUKLIR 1] Menghancurkan ContentSizeFitter!
+                // Jika komponen ini ada, ia akan terus melawan pengaturan width/height kita. Eksekusi mati di tempat!
+                if (key == "width" || key == "height" || key == "ignorelayout")
+                {
+                    ContentSizeFitter csf = comp.GetComponent<ContentSizeFitter>();
+                    if (csf != null) Object.DestroyImmediate(csf);
+                }
+
+                // 💣 [OPSI NUKLIR 2] Melepaskan diri dari rantai Layout Group (ignoreLayout)
+                // Memaksa tombol agar bisa dibesarkan bebas walau dikunci oleh Parent-nya.
+                if (key == "ignorelayout" && bool.TryParse(val, out bool ignore))
+                {
+                    LayoutElement le = comp.gameObject.GetComponent<LayoutElement>();
+                    if (le == null) le = comp.gameObject.AddComponent<LayoutElement>();
+                    le.ignoreLayout = ignore;
+                    continue;
+                }
+
+                // [Hack OneLine] Mencegah teks turun ke bawah dengan Non-Breaking Space
                 if (key == "oneline" && bool.TryParse(val, out bool ol) && ol)
                 {
                     if (textValue != null)
@@ -333,7 +391,7 @@ namespace PvZEcologyTranslator.Patches
                     }
                     continue;
                 }
-                // [FITUR BARU 0.14.7] Pengatur Ukuran Tab (\t) menjadi spasi
+                // [Tab Size] Mengubah karakter tab \t menjadi rentetan spasi biasa
                 else if (key == "tabsize" && int.TryParse(val, out int tSize))
                 {
                     if (textValue != null && tSize >= 0)
@@ -342,11 +400,13 @@ namespace PvZEcologyTranslator.Patches
                     }
                     continue;
                 }
+                // Memutar objek
                 else if (key == "rotation" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float rot))
                 {
                     comp.transform.localEulerAngles = new Vector3(comp.transform.localEulerAngles.x, comp.transform.localEulerAngles.y, rot);
                     continue;
                 }
+                // Menggeser objek secara fisik
                 else if (key == "posx" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float px))
                 {
                     if (comp.transform is RectTransform rt) rt.anchoredPosition = new Vector2(px, rt.anchoredPosition.y);
@@ -359,7 +419,7 @@ namespace PvZEcologyTranslator.Patches
                     else comp.transform.localPosition = new Vector3(comp.transform.localPosition.x, py, comp.transform.localPosition.z);
                     continue;
                 }
-                // [UPDATE 0.14.5] Fix Absolute Width: Kini tidak peduli apa Anchor-nya, ukurannya pasti melar secara presisi!
+                // Melebarkan/Meninggikan objek secara presisi menggunakan Anchor
                 else if (key == "width" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float w))
                 {
                     if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
@@ -370,7 +430,7 @@ namespace PvZEcologyTranslator.Patches
                     if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
                     continue;
                 }
-                // [FITUR BARU] Scale Override: Senjata pamungkas penembus Layout Group & Mask
+                // [Opsi Nuklir 3] Manipulasi ukuran visual secara brutal menembus batas Layout & RectMask2D
                 else if (key == "scalex" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sx))
                 {
                     comp.transform.localScale = new Vector3(sx, comp.transform.localScale.y, comp.transform.localScale.z);
@@ -382,6 +442,9 @@ namespace PvZEcologyTranslator.Patches
                     continue;
                 }
 
+                // -------------------------------------------------------------
+                // PENGATURAN KHUSUS KOMPONEN TEKS (Size, BestFit, Wrap, dll)
+                // -------------------------------------------------------------
                 if (comp is Text uiText)
                 {
                     if (key == "size" && int.TryParse(val, out int size)) uiText.fontSize = size;
@@ -389,12 +452,15 @@ namespace PvZEcologyTranslator.Patches
                     else if (key == "maxsize" && int.TryParse(val, out int maxs)) uiText.resizeTextMaxSize = maxs;
                     else if (key == "minsize" && int.TryParse(val, out int mins)) uiText.resizeTextMinSize = mins;
 
-                    // [FITUR BARU] Vertical Overflow: Mencegah teks terpotong secara vertikal
+                    // Mencegah teks terpotong sebagian di bagian atas/bawah (Truncate Killer)
                     else if (key == "voverflow" && bool.TryParse(val, out bool vo)) uiText.verticalOverflow = vo ? VerticalWrapMode.Overflow : VerticalWrapMode.Truncate;
 
+                    // Mencegah teks turun ke baris baru
                     else if (key == "nowrap" && bool.TryParse(val, out bool nw))
                     {
                         uiText.horizontalOverflow = nw ? HorizontalWrapMode.Overflow : HorizontalWrapMode.Wrap;
+                        // Jika nowrap nyala, kita harus mematikan bestfit dan menyalakan vertical overflow
+                        // agar teks bisa melintas bebas keluar batas tanpa disensor
                         if (nw)
                         {
                             uiText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -408,7 +474,7 @@ namespace PvZEcologyTranslator.Patches
                         uiText.lineSpacing = ls;
                         if (uiText.resizeTextForBestFit)
                         {
-                            Main.Log.LogWarning($"[UI Overrides] Unity Bug: 'linespacing' on {comp.name} will not work if 'bestfit' is active!");
+                            Main.Log.LogWarning($"[UI Overrides] Unity Bug: 'linespacing' pada {comp.name} tidak akan berefek jika 'bestfit' menyala!");
                         }
                     }
                     else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color c)) uiText.color = c;
@@ -434,6 +500,7 @@ namespace PvZEcologyTranslator.Patches
                 }
                 else if (comp.GetType().Name.Contains("TextMeshPro"))
                 {
+                    // TMPro diproses dengan Reflection karena DLL-nya seringkali terpisah
                     var type = comp.GetType();
                     if (key == "size" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sizeTMP)) type.GetProperty("fontSize")?.SetValue(comp, sizeTMP, null);
                     else if (key == "bestfit" && bool.TryParse(val, out bool bfTMP)) type.GetProperty("enableAutoSizing")?.SetValue(comp, bfTMP, null);
@@ -446,6 +513,7 @@ namespace PvZEcologyTranslator.Patches
                     else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color cTMP)) type.GetProperty("color")?.SetValue(comp, cTMP, null);
                     else if (key == "linespacing" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float lsTMP))
                     {
+                        // TMP menggunakan perhitungan lineSpacing yang berbeda dari UGUI
                         float additiveSpacing = (lsTMP - 1f) * 100f;
                         type.GetProperty("lineSpacing")?.SetValue(comp, additiveSpacing, null);
                     }
@@ -453,10 +521,14 @@ namespace PvZEcologyTranslator.Patches
             }
         }
 
+        // =========================================================================
+        // REFRESHER TEKS GLOBAL (DIPANGGIL SAAT TEKAN F5)
+        // =========================================================================
         public static void RefreshAllTexts()
         {
             try
             {
+                // 1. Membersihkan cache teks dari objek yang sudah hancur/hilang dari layar
                 List<Component> deadKeys = new List<Component>();
                 foreach (var key in OriginalTextCache.Keys)
                 {
@@ -464,6 +536,7 @@ namespace PvZEcologyTranslator.Patches
                 }
                 foreach (var k in deadKeys) OriginalTextCache.Remove(k);
 
+                // 2. Refresh semua UGUI Text
                 Text[] allTexts = Resources.FindObjectsOfTypeAll<Text>();
                 foreach (Text t in allTexts)
                 {
@@ -489,6 +562,7 @@ namespace PvZEcologyTranslator.Patches
                     }
                 }
 
+                // 3. Refresh semua TextMesh 3D
                 TextMesh[] allTMs = Resources.FindObjectsOfTypeAll<TextMesh>();
                 foreach (TextMesh tm in allTMs)
                 {
@@ -514,6 +588,7 @@ namespace PvZEcologyTranslator.Patches
                     }
                 }
 
+                // 4. Refresh semua TextMeshPro
                 System.Type tmpType = AccessTools.TypeByName("TMPro.TMP_Text");
                 if (tmpType != null)
                 {
@@ -522,7 +597,6 @@ namespace PvZEcologyTranslator.Patches
                     {
                         Component tmp = tmpObj as Component;
                         if (tmp == null || tmp.gameObject.scene.name == null) continue;
-
                         if (!tmp.gameObject.activeInHierarchy) continue;
 
                         var prop = tmpType.GetProperty("text");

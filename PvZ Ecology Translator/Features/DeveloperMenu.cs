@@ -447,7 +447,7 @@ namespace PvZEcologyTranslator.Features
             DrawStatusRow("Queue Text", queueTextCount.ToString());
             DrawStatusRow("Text Translated", translatedTextCount.ToString());
             DrawStatusRow("Plants Dumped", $"{plantDumpCount} / 57", 70f);
-            DrawStatusRow("Zombies Dumped", $"{zombieDumpCount} / 44", 70f);
+            DrawStatusRow("Zombies Dumped", $"{zombieDumpCount} / 61", 70f);
             GUILayout.EndVertical();
 
             GUILayout.EndScrollView();
