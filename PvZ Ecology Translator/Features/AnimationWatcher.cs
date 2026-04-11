@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0017, IDE0270, IDE0079 // Membungkam pesan Object Initialization dan Null Check
+﻿#pragma warning disable IDE0017, IDE0270
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,76 +10,84 @@ namespace PvZEcologyTranslator.Features
     {
         private Image img;
         private SpriteRenderer sr;
-
-        private Sprite lastOriginalSprite;
-        private Sprite lastTranslatedSprite;
+        private ParticleSystemRenderer psr;
+        private MeshRenderer mr;
 
         void Awake()
         {
-            // Cache komponen sekali di awal agar ringan dan tidak membebani performa game
+            // Cache komponen di awal agar performa game tetap lancar
             img = GetComponent<Image>();
             sr = GetComponent<SpriteRenderer>();
+            psr = GetComponent<ParticleSystemRenderer>();
+            mr = GetComponent<MeshRenderer>();
         }
 
-        // Berjalan di detik-detik terakhir sebelum frame digambar ke layar (monitor)
-        void LateUpdate()
-        {
-            // [UPDATE] Dihapus if (!TextureManager.EnableImageTranslation) return; 
-            // agar efek animasi ledakan juga membaca tekstur dari folder Original ([Default Textures])
+        // Jalankan pelacakan di setiap tahap penggambaran frame
+        void Update() { ForceReplaceSprite(); }
+        void LateUpdate() { ForceReplaceSprite(); }
+        void OnWillRenderObject() { ForceReplaceSprite(); }
 
+        private void ForceReplaceSprite()
+        {
+            // Mencari ulang komponen jaga-jaga jika skrip game menambahkannya belakangan
+            if (img == null) img = GetComponent<Image>();
+            if (sr == null) sr = GetComponent<SpriteRenderer>();
+            if (psr == null) psr = GetComponent<ParticleSystemRenderer>();
+            if (mr == null) mr = GetComponent<MeshRenderer>();
+
+            // 1. Cek UI Image standar
             if (img != null && img.sprite != null)
             {
                 Sprite s = img.sprite;
-
-                // Jika sprite berubah, dan sprite itu BUKAN hasil terjemahan mod kita
-                if (s != lastTranslatedSprite && !s.name.EndsWith("_Translated"))
+                if (!s.name.EndsWith("_Translated"))
                 {
-                    lastOriginalSprite = s;
-                    string cleanName = lastOriginalSprite.name.Replace("(Clone)", "").Trim();
-
-                    // Coba cari terjemahannya di kamus
-                    Sprite translated = TextureManager.GetTranslatedSprite(lastOriginalSprite, cleanName);
-                    if (translated != null)
-                    {
-                        lastTranslatedSprite = translated;
-                        img.sprite = translated; // Timpa seketika!
-                    }
-                    else
-                    {
-                        // Tidak ada file terjemahan di folder, anggap original sebagai yang terakhir agar tidak spam proses
-                        lastTranslatedSprite = s;
-                    }
-                }
-                // Jika sprite yang tampil sekarang ADALAH hasil terjemahan, update catatan kita
-                else if (s != lastTranslatedSprite && s.name.EndsWith("_Translated"))
-                {
-                    lastTranslatedSprite = s;
+                    string cleanName = s.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                    Sprite translated = TextureManager.GetTranslatedSprite(s, cleanName);
+                    if (translated != null) img.sprite = translated;
                 }
             }
 
+            // 2. Cek SpriteRenderer
             if (sr != null && sr.sprite != null)
             {
                 Sprite s = sr.sprite;
-
-                if (s != lastTranslatedSprite && !s.name.EndsWith("_Translated"))
+                if (!s.name.EndsWith("_Translated"))
                 {
-                    lastOriginalSprite = s;
-                    string cleanName = lastOriginalSprite.name.Replace("(Clone)", "").Trim();
+                    string cleanName = s.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                    Sprite translated = TextureManager.GetTranslatedSprite(s, cleanName);
+                    if (translated != null) sr.sprite = translated;
+                }
+            }
 
-                    Sprite translated = TextureManager.GetTranslatedSprite(lastOriginalSprite, cleanName);
-                    if (translated != null)
+            // 3. [FITUR BARU] Cek Particle System (Efek Ledakan Doom, Spudow, Sproing!)
+            if (psr != null && psr.material != null && psr.material.mainTexture != null)
+            {
+                Texture tex = psr.material.mainTexture;
+                if (!tex.name.EndsWith("_Translated"))
+                {
+                    string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+
+                    // Particle System menggunakan Texture2D murni, bukan Sprite.
+                    if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
                     {
-                        lastTranslatedSprite = translated;
-                        sr.sprite = translated;
-                    }
-                    else
-                    {
-                        lastTranslatedSprite = s;
+                        customTex.name = cleanName + "_Translated";
+                        psr.material.mainTexture = customTex; // Timpa material partikel!
                     }
                 }
-                else if (s != lastTranslatedSprite && s.name.EndsWith("_Translated"))
+            }
+
+            // 4. [FITUR BARU] Cek MeshRenderer (Untuk objek 3D datar klasik)
+            if (mr != null && mr.material != null && mr.material.mainTexture != null)
+            {
+                Texture tex = mr.material.mainTexture;
+                if (!tex.name.EndsWith("_Translated"))
                 {
-                    lastTranslatedSprite = s;
+                    string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                    if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                    {
+                        customTex.name = cleanName + "_Translated";
+                        mr.material.mainTexture = customTex;
+                    }
                 }
             }
         }

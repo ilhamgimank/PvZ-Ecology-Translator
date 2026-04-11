@@ -1,8 +1,7 @@
-﻿#pragma warning disable IDE0044 // Membungkam pesan Object Initialization dan Null Check
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
-using System.Diagnostics; // [FITUR BARU] Wajib di-import untuk fitur Stopwatch
+using System.Diagnostics; // Wajib di-import untuk fitur Stopwatch
 
 namespace PvZEcologyTranslator.Managers
 {
@@ -26,7 +25,7 @@ namespace PvZEcologyTranslator.Managers
 
             string langFolder = PvZEcologyTranslator.Features.LanguageMenu.CurrentLanguage;
 
-            // [UPDATE] Tentukan folder berdasarkan status EnableImageTranslation
+            // Tentukan folder berdasarkan status EnableImageTranslation
             // true = Modded (Localization folder), false = Original (Default Textures folder)
             string texturesPath = EnableImageTranslation
                 ? Path.Combine(FileManager.LocalizationFolder, langFolder, "Textures")
@@ -39,11 +38,20 @@ namespace PvZEcologyTranslator.Managers
                 {
                     string fileName = Path.GetFileNameWithoutExtension(file);
                     byte[] fileData = File.ReadAllBytes(file);
-                    Texture2D tex = new Texture2D(2, 2);
+
+                    // Membuat tekstur baru 
+                    Texture2D tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
 
                     if (tex.LoadImage(fileData))
                     {
                         tex.name = fileName;
+
+                        // [FIX 9-SLICE BUG] KUNCI RAHASIA UNITY!
+                        // Mode Clamp mencegah gambar bocor di ujung. Ini adalah syarat mutlak
+                        // agar kotak/background (Sliced Image) bisa melar menyesuaikan teks tanpa menjadi gepeng.
+                        tex.wrapMode = TextureWrapMode.Clamp;
+                        tex.filterMode = FilterMode.Bilinear; // Agar gambar lebih halus
+
                         CustomTextures[fileName] = tex;
                     }
                 }
@@ -64,14 +72,28 @@ namespace PvZEcologyTranslator.Managers
             if (CustomTextures.TryGetValue(cleanName, out Texture2D tex))
             {
                 Vector2 pivot = new Vector2(0.5f, 0.5f);
-                if (originalSprite != null && originalSprite.rect.width > 0 && originalSprite.rect.height > 0)
+                float ppu = 100f;
+                Vector4 border = Vector4.zero;
+
+                if (originalSprite != null)
                 {
-                    pivot = new Vector2(originalSprite.pivot.x / originalSprite.rect.width, originalSprite.pivot.y / originalSprite.rect.height);
+                    if (originalSprite.rect.width > 0 && originalSprite.rect.height > 0)
+                    {
+                        pivot = new Vector2(originalSprite.pivot.x / originalSprite.rect.width, originalSprite.pivot.y / originalSprite.rect.height);
+                    }
+                    ppu = originalSprite.pixelsPerUnit;
+
+                    // Menyalin sifat melar (9-Slice Border) dari gambar asli
+                    border = originalSprite.border;
                 }
 
-                float ppu = originalSprite != null ? originalSprite.pixelsPerUnit : 100f;
-                Vector4 border = originalSprite != null ? originalSprite.border : Vector4.zero;
+                // [FIX 9-SLICE BUG] Penyesuaian Border Ekstra Keamanan
+                // Jika kamu mengedit ukuran PNG-nya menjadi terlalu kecil, ini mencegah Unity error/crash
+                // dengan memastikan batas potongnya tidak lebih besar dari gambar editanmu.
+                if (border.x + border.z >= tex.width) { border.x = 0; border.z = 0; }
+                if (border.y + border.w >= tex.height) { border.y = 0; border.w = 0; }
 
+                // Menciptakan Sprite baru dengan menyertakan sifat 'border' agar kotak bisa melar
                 Sprite newSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), pivot, ppu, 0, SpriteMeshType.FullRect, border);
                 newSprite.name = cleanName + "_Translated";
 

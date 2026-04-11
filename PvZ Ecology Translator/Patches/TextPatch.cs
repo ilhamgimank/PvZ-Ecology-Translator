@@ -172,12 +172,8 @@ namespace PvZEcologyTranslator.Patches
             // Abaikan UI Notifikasi bawaan mod kita agar tidak ikut diterjemahkan
             if (comp != null && comp.gameObject.name == "NotifText") return;
 
-            // Abaikan teks UI Menu Developer (F12)
-            if (value.Contains("Enable ") || value.Contains("Disabled") || value.Contains("Enabled") ||
-                value.Contains("Mod Version") || value.Contains("PvZ Ecology") || value.Contains("Active Language"))
-            {
-                return;
-            }
+            // [FIX] Filter pemblokir kata "Enabled", "Disabled", "Mod Version" dsb telah dihapus 
+            // agar tidak memblokir UI tombol game bawaan secara tidak sengaja!
 
             UpdateReverseCache();
 
@@ -334,10 +330,22 @@ namespace PvZEcologyTranslator.Patches
             if (DeveloperMenu.EnableUIOverrides && comp != null)
             {
                 string objPath = PathDetector.GetPath(comp.transform);
+
+                // 1. Coba cari jalur aslinya persis (termasuk '(Clone)' jika ada)
                 if (TranslationManager.UIOverrides.TryGetValue(objPath, out string overrideData))
                 {
                     ApplyUIOverrides(comp, overrideData, ref value);
                     wasTranslated = true; // Anggap sebagai terjemahan agar masuk ke ReverseCache
+                }
+                else
+                {
+                    // 2. FALLBACK (SMART CHECK): Jika tidak ketemu, coba hapus (Clone) dan cari lagi!
+                    string cleanPath = objPath.Replace("(Clone)", "").Trim();
+                    if (cleanPath != objPath && TranslationManager.UIOverrides.TryGetValue(cleanPath, out overrideData))
+                    {
+                        ApplyUIOverrides(comp, overrideData, ref value);
+                        wasTranslated = true;
+                    }
                 }
             }
 
@@ -358,11 +366,35 @@ namespace PvZEcologyTranslator.Patches
             {
                 if (string.IsNullOrWhiteSpace(prop)) continue;
 
-                string[] kvp = prop.Split('=');
-                if (kvp.Length != 2) continue;
+                // [FIX CRASH] Gunakan IndexOf agar spasi atau karakter '=' di teks replace tidak error
+                int eqIndex = prop.IndexOf('=');
+                if (eqIndex == -1) continue;
 
-                string key = kvp[0].Trim().ToLower();
-                string val = kvp[1].Trim().ToLower();
+                string key = prop.Substring(0, eqIndex).Trim().ToLower();
+                string valOriginal = prop.Substring(eqIndex + 1); // JANGAN DI-TRIM! Spasi utuh dipertahankan.
+                string val = valOriginal.Trim().ToLower(); // Trim khusus untuk angka/boolean
+
+                // -------------------------------------------------------------
+                // [FITUR BARU] Manipulasi / Menimpa Teks secara Langsung
+                // -------------------------------------------------------------
+                if (key == "text")
+                {
+                    if (textValue != null) textValue = valOriginal.Replace("\\n", "\n");
+                    continue;
+                }
+                else if (key == "replace" && valOriginal.Contains("|"))
+                {
+                    string[] rep = valOriginal.Split('|');
+                    if (rep.Length == 2 && textValue != null)
+                    {
+                        // [FIX CRASH] Mencegah error "String cannot be of zero length"
+                        if (!string.IsNullOrEmpty(rep[0]))
+                        {
+                            textValue = textValue.Replace(rep[0], rep[1].Replace("\\n", "\n"));
+                        }
+                    }
+                    continue;
+                }
 
                 // 💣 [OPSI NUKLIR 1] Menghancurkan ContentSizeFitter!
                 // Jika komponen ini ada, ia akan terus melawan pengaturan width/height kita. Eksekusi mati di tempat!
@@ -419,15 +451,23 @@ namespace PvZEcologyTranslator.Patches
                     else comp.transform.localPosition = new Vector3(comp.transform.localPosition.x, py, comp.transform.localPosition.z);
                     continue;
                 }
-                // Melebarkan/Meninggikan objek secara presisi menggunakan Anchor
+                // Melebarkan/Meninggikan objek secara HARDCORE
                 else if (key == "width" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float w))
                 {
-                    if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
+                    if (comp.transform is RectTransform rt)
+                    {
+                        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
+                        rt.sizeDelta = new Vector2(w, rt.sizeDelta.y); // Paksa modifikasi di akar delta
+                    }
                     continue;
                 }
                 else if (key == "height" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float h))
                 {
-                    if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
+                    if (comp.transform is RectTransform rt)
+                    {
+                        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
+                        rt.sizeDelta = new Vector2(rt.sizeDelta.x, h); // Paksa modifikasi di akar delta
+                    }
                     continue;
                 }
                 // [Opsi Nuklir 3] Manipulasi ukuran visual secara brutal menembus batas Layout & RectMask2D
@@ -477,7 +517,7 @@ namespace PvZEcologyTranslator.Patches
                             Main.Log.LogWarning($"[UI Overrides] Unity Bug: 'linespacing' pada {comp.name} tidak akan berefek jika 'bestfit' menyala!");
                         }
                     }
-                    else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color c)) uiText.color = c;
+                    else if (key == "color" && ColorUtility.TryParseHtmlString(valOriginal, out Color c)) uiText.color = c;
                     else if (key == "align")
                     {
                         if (val == "center") uiText.alignment = TextAnchor.MiddleCenter;
@@ -490,7 +530,7 @@ namespace PvZEcologyTranslator.Patches
                     if (key == "size" && int.TryParse(val, out int size)) legacy3DText.fontSize = size;
                     else if (key == "charsize" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float cs)) legacy3DText.characterSize = cs;
                     else if (key == "linespacing" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float ls)) legacy3DText.lineSpacing = ls;
-                    else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color c)) legacy3DText.color = c;
+                    else if (key == "color" && ColorUtility.TryParseHtmlString(valOriginal, out Color c)) legacy3DText.color = c;
                     else if (key == "align")
                     {
                         if (val == "center") legacy3DText.alignment = TextAlignment.Center;
@@ -510,7 +550,7 @@ namespace PvZEcologyTranslator.Patches
                     else if (key == "nowrap" && bool.TryParse(val, out bool nwTMP)) type.GetProperty("enableWordWrapping")?.SetValue(comp, !nwTMP, null);
                     else if (key == "wrap" && bool.TryParse(val, out bool wTMP)) type.GetProperty("enableWordWrapping")?.SetValue(comp, wTMP, null);
 
-                    else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color cTMP)) type.GetProperty("color")?.SetValue(comp, cTMP, null);
+                    else if (key == "color" && ColorUtility.TryParseHtmlString(valOriginal, out Color cTMP)) type.GetProperty("color")?.SetValue(comp, cTMP, null);
                     else if (key == "linespacing" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float lsTMP))
                     {
                         // TMP menggunakan perhitungan lineSpacing yang berbeda dari UGUI
@@ -558,6 +598,12 @@ namespace PvZEcologyTranslator.Patches
                             IsApplyingTranslation = true;
                             t.text = translated;
                             IsApplyingTranslation = false;
+                        }
+                        else
+                        {
+                            // [UPDATE PENTING] Force Hard Refresh: Paksa Unity merefresh ukuran dan layout meski teks tidak berubah!
+                            t.SetAllDirty();
+                            if (t.transform is RectTransform rt) LayoutRebuilder.MarkLayoutForRebuild(rt);
                         }
                     }
                 }
@@ -621,11 +667,18 @@ namespace PvZEcologyTranslator.Patches
                                 prop.SetValue(tmp, translated, null);
                                 IsApplyingTranslation = false;
                             }
+                            else
+                            {
+                                // Force TMPro Hard Refresh
+                                IsApplyingTranslation = true;
+                                prop.SetValue(tmp, translated, null);
+                                IsApplyingTranslation = false;
+                            }
                         }
                     }
                 }
 
-                Main.Log.LogInfo("[TextPatch] Refresh Texts Complete. Reverse Caching Active.");
+                Main.Log.LogInfo("[TextPatch] Refresh Texts Complete. Hard Refresh & Layout Rebuild executed.");
             }
             catch (System.Exception ex)
             {

@@ -10,12 +10,13 @@ using PvZEcologyTranslator.Features;
 
 namespace PvZEcologyTranslator
 {
-    // [UPDATE VERSI 0.14.9] Perbaikan Scrollbar UI Developer Menu
-    [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", ModVersion)]
+    // [UPDATE VERSI 0.2.0] Major UI Overrides Update & Smart Path
+    // Penulisan versi di-hardcode di atribut untuk mencegah error compiler C# pada Unity lawas
+    [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", "0.2.0")]
     public class Main : BaseUnityPlugin
     {
-        // Variabel versi mod. Mengubah angka di sini akan otomatis mengubah tampilan di dalam game!
-        public const string ModVersion = "0.14.9";
+        // Variabel versi mod yang dipanggil oleh DeveloperMenu.cs (Ini yang menyelesaikan error ModVersion)
+        public const string ModVersion = "0.2.0";
 
         internal static Main Instance;
         public static ManualLogSource Log;
@@ -149,6 +150,7 @@ namespace PvZEcologyTranslator
             AlmanacDumper.Update();
         }
 
+        // FUNGSI INI YANG SEBELUMNYA TERHAPUS (Ini yang menyelesaikan error SaveConfigs)
         public static void SaveConfigs()
         {
             if (CustomConfig == null) return;
