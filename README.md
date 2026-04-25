@@ -1,6 +1,6 @@
 # 🌻 PvZ Ecology Translator Mod
 
-![Mod Version](https://img.shields.io/badge/Version-0.14.7-brightgreen?style=for-the-badge)
+![Mod Version](https://img.shields.io/badge/Version-0.2.0-brightgreen?style=for-the-badge)
 ![BepInEx](https://img.shields.io/badge/Requires-BepInEx_5-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge)
 
