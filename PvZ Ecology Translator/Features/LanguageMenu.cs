@@ -181,6 +181,7 @@ namespace PvZEcologyTranslator.Features
 
             if (CurrentLanguage == "Chinese") txt.text = "语言";
             else if (CurrentLanguage == "Indonesian") txt.text = "Bahasa:";
+            else if (CurrentLanguage == "Spanish") txt.text = "Idioma:"; // [BARU] Opsi Spanyol
             else txt.text = "Language:";
         }
 
@@ -230,6 +231,7 @@ namespace PvZEcologyTranslator.Features
             CreateLanguageItem("Chinese");
             CreateLanguageItem("English");
             CreateLanguageItem("Indonesian");
+            CreateLanguageItem("Spanish"); // [BARU] Tambah Spanyol ke daftar
 
             GameObject backButton = GameObject.Find("Canvas/MoreOption/Back");
             if (backButton != null)
@@ -260,7 +262,12 @@ namespace PvZEcologyTranslator.Features
         {
             if (CurrentLanguage == langName)
             {
-                string msg = langName == "Indonesian" ? "Bahasa ini sudah digunakan!" : (langName == "Chinese" ? "该语言已在使用！" : "This language is already in use!");
+                // [FIX] Mengubah logika notifikasi agar lebih rapi untuk banyak bahasa
+                string msg = "This language is already in use!";
+                if (langName == "Indonesian") msg = "Bahasa ini sudah digunakan!";
+                else if (langName == "Chinese") msg = "该语言已在使用！";
+                else if (langName == "Spanish") msg = "¡Este idioma ya está en uso!"; // [BARU]
+
                 CreateNotificationUI(msg, Color.yellow);
 
                 ToggleDropdown();
@@ -356,6 +363,12 @@ namespace PvZEcologyTranslator.Features
                 confirmText = "Iya";
                 cancelText = "Ga";
             }
+            else if (targetLang == "Spanish") // [BARU] Terjemahan Spanyol
+            {
+                titleText = "¿Estás seguro de que quieres cambiar el idioma?";
+                confirmText = "Sí";
+                cancelText = "Cancelar";
+            }
 
             Transform titleTr = languageConfirmPanel.transform.Find("TitleText");
             Transform confirmTr = languageConfirmPanel.transform.Find("Confirm");
@@ -417,10 +430,15 @@ namespace PvZEcologyTranslator.Features
             UpdateLanguageLabelText();
             UpdateButtonText();
 
-            // [FIX 0.9.1] Memanggil pembaruan label bahasa pada TextureMenu yang baru dibuat
+            // Memanggil pembaruan label bahasa pada TextureMenu
             TextureMenu.UpdateTextureLabelText();
 
-            string msg = langName == "Indonesian" ? "Bahasa berhasil diubah!" : (langName == "Chinese" ? "语言更改成功！" : "Language changed successfully!");
+            // [FIX] Notifikasi menggunakan logika yang lebih rapi
+            string msg = "Language changed successfully!";
+            if (langName == "Indonesian") msg = "Bahasa berhasil diubah!";
+            else if (langName == "Chinese") msg = "语言更改成功！";
+            else if (langName == "Spanish") msg = "¡Idioma cambiado con éxito!"; // [BARU]
+
             CreateNotificationUI(msg, Color.green);
 
             TextPatch.RefreshAllTexts();

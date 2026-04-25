@@ -1,4 +1,4 @@
-﻿#pragma warning disable IDE0051 
+﻿#pragma warning disable IDE0051, IDE0270 
 
 using HarmonyLib;
 using UnityEngine;
@@ -32,12 +32,33 @@ namespace PvZEcologyTranslator.Patches
             {
                 var setterSR = AccessTools.PropertySetter(typeof(SpriteRenderer), "sprite");
                 harmony.Patch(setterSR, prefix: new HarmonyMethod(typeof(ImagePatch), nameof(SpriteRenderer_Prefix)));
-                var onEnableSR = AccessTools.Method(typeof(SpriteRenderer), "OnEnable");
-                if (onEnableSR != null) harmony.Patch(onEnableSR, postfix: new HarmonyMethod(typeof(ImagePatch), nameof(SpriteRenderer_OnEnable_Postfix)));
-
                 Main.Log.LogInfo("[Hook] SpriteRenderer hooks applied.");
             }
             catch { }
+
+            try
+            {
+                var inst1 = AccessTools.Method(typeof(Object), "Instantiate", new System.Type[] { typeof(Object) });
+                var inst2 = AccessTools.Method(typeof(Object), "Instantiate", new System.Type[] { typeof(Object), typeof(Transform) });
+                var inst3 = AccessTools.Method(typeof(Object), "Instantiate", new System.Type[] { typeof(Object), typeof(Transform), typeof(bool) });
+                var inst4 = AccessTools.Method(typeof(Object), "Instantiate", new System.Type[] { typeof(Object), typeof(Vector3), typeof(Quaternion) });
+                var inst5 = AccessTools.Method(typeof(Object), "Instantiate", new System.Type[] { typeof(Object), typeof(Vector3), typeof(Quaternion), typeof(Transform) });
+
+                var postfixInst = new HarmonyMethod(typeof(ImagePatch), nameof(Instantiate_Postfix));
+
+                if (inst1 != null) harmony.Patch(inst1, postfix: postfixInst);
+                if (inst2 != null) harmony.Patch(inst2, postfix: postfixInst);
+                if (inst3 != null) harmony.Patch(inst3, postfix: postfixInst);
+                if (inst4 != null) harmony.Patch(inst4, postfix: postfixInst);
+                if (inst5 != null) harmony.Patch(inst5, postfix: postfixInst);
+
+                Main.Log.LogInfo("[Hook] Dynamic Object Spawner (Instantiate) hooks applied.");
+            }
+            catch { Main.Log.LogWarning("[Hook] Dynamic Object Spawner failed to patch."); }
+
+            GameObject scanner = new GameObject("PvZ_ImageScanner");
+            scanner.AddComponent<DynamicImageScanner>();
+            Object.DontDestroyOnLoad(scanner);
         }
 
         private static void Image_Prefix(Image __instance, ref Sprite value) => ProcessImage(__instance, ref value);
@@ -63,23 +84,107 @@ namespace PvZEcologyTranslator.Patches
             }
         }
 
-        private static void SpriteRenderer_OnEnable_Postfix(SpriteRenderer __instance)
+        // [UPDATE] Pasang mata-mata ke SEMUA objek tanpa terkecuali!
+        private static void Instantiate_Postfix(Object __result)
         {
-            if (__instance == null || __instance.sprite == null) return;
-            Sprite val = __instance.sprite;
+            if (!TextureManager.EnableImageTranslation || __result == null) return;
 
-            if (OriginalSpriteCache.TryGetValue(__instance, out Sprite cached))
+            GameObject go = __result as GameObject;
+            if (go == null)
             {
-                val = cached;
+                Component comp = __result as Component;
+                if (comp != null) go = comp.gameObject;
+            }
+            if (go == null) return;
+
+            Renderer[] renderers = go.GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer r in renderers)
+            {
+                if (r is SpriteRenderer sr)
+                {
+                    if (sr.gameObject.GetComponent<AnimationWatcher>() == null) sr.gameObject.AddComponent<AnimationWatcher>();
+                    if (sr.sprite != null)
+                    {
+                        Sprite val = sr.sprite;
+                        ProcessImage(sr, ref val, true);
+                        if (sr.sprite != val) { isApplyingTranslation = true; sr.sprite = val; isApplyingTranslation = false; }
+                    }
+                }
+                else if (r is ParticleSystemRenderer psr)
+                {
+                    if (psr.gameObject.GetComponent<AnimationWatcher>() == null) psr.gameObject.AddComponent<AnimationWatcher>();
+                    if (psr.sharedMaterial != null && psr.sharedMaterial.mainTexture != null)
+                    {
+                        Texture tex = psr.sharedMaterial.mainTexture;
+                        if (!tex.name.EndsWith("_Translated"))
+                        {
+                            string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                            if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                            {
+                                customTex.name = cleanName + "_Translated";
+                                psr.sharedMaterial.mainTexture = customTex;
+                            }
+                        }
+                    }
+                }
+                else if (r is MeshRenderer mr)
+                {
+                    if (mr.gameObject.GetComponent<AnimationWatcher>() == null) mr.gameObject.AddComponent<AnimationWatcher>();
+                    if (mr.sharedMaterial != null && mr.sharedMaterial.mainTexture != null)
+                    {
+                        Texture tex = mr.sharedMaterial.mainTexture;
+                        if (!tex.name.EndsWith("_Translated"))
+                        {
+                            string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                            if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                            {
+                                customTex.name = cleanName + "_Translated";
+                                mr.sharedMaterial.mainTexture = customTex;
+                            }
+                        }
+                    }
+                }
             }
 
-            ProcessImage(__instance, ref val, true);
-
-            if (__instance.sprite != val)
+            Image[] images = go.GetComponentsInChildren<Image>(true);
+            foreach (Image img in images)
             {
-                isApplyingTranslation = true;
-                __instance.sprite = val;
-                isApplyingTranslation = false;
+                if (img.gameObject.GetComponent<AnimationWatcher>() == null) img.gameObject.AddComponent<AnimationWatcher>();
+                if (img.sprite != null)
+                {
+                    Sprite val = img.sprite;
+                    ProcessImage(img, ref val, true);
+                    if (img.sprite != val) { isApplyingTranslation = true; img.sprite = val; isApplyingTranslation = false; }
+                }
+            }
+        }
+
+        private class DynamicImageScanner : MonoBehaviour
+        {
+            private float scanTimer = 0f;
+
+            void Update()
+            {
+                if (!TextureManager.EnableImageTranslation) return;
+
+                scanTimer -= Time.unscaledDeltaTime;
+                if (scanTimer <= 0)
+                {
+                    // Scan pelapis santai setiap 2 detik untuk menangkap objek yang bersembunyi
+                    scanTimer = 2.0f;
+
+                    SpriteRenderer[] allSRs = FindObjectsOfType<SpriteRenderer>();
+                    foreach (SpriteRenderer sr in allSRs)
+                        if (sr.gameObject.GetComponent<AnimationWatcher>() == null) sr.gameObject.AddComponent<AnimationWatcher>();
+
+                    ParticleSystemRenderer[] allPSRs = FindObjectsOfType<ParticleSystemRenderer>();
+                    foreach (ParticleSystemRenderer psr in allPSRs)
+                        if (psr.gameObject.GetComponent<AnimationWatcher>() == null) psr.gameObject.AddComponent<AnimationWatcher>();
+
+                    Image[] allImgs = FindObjectsOfType<Image>();
+                    foreach (Image img in allImgs)
+                        if (img.gameObject.GetComponent<AnimationWatcher>() == null) img.gameObject.AddComponent<AnimationWatcher>();
+                }
             }
         }
 
@@ -100,8 +205,6 @@ namespace PvZEcologyTranslator.Patches
                 TextureManager.DumpSprite(value);
             }
 
-            // [UPDATE] Hapus batasan if (TextureManager.EnableImageTranslation)
-            // Karena sekarang kita selalu memuat tekstur ke memori sesuai mode yang dipilih (Modded/Original)
             string lookupName = value.name;
             Sprite refSprite = value;
 
@@ -157,7 +260,6 @@ namespace PvZEcologyTranslator.Patches
                     if (comp.transform is RectTransform rt) rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, py);
                     else comp.transform.localPosition = new Vector3(comp.transform.localPosition.x, py, comp.transform.localPosition.z);
                 }
-                // [UPDATE 0.14.5] Fix Absolute Width untuk gambar
                 else if (key == "width" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float w))
                 {
                     if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
@@ -165,6 +267,14 @@ namespace PvZEcologyTranslator.Patches
                 else if (key == "height" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float h))
                 {
                     if (comp.transform is RectTransform rt) rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
+                }
+                else if (key == "scalex" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sx))
+                {
+                    comp.transform.localScale = new Vector3(sx, comp.transform.localScale.y, comp.transform.localScale.z);
+                }
+                else if (key == "scaley" && float.TryParse(val, NumberStyles.Float, CultureInfo.InvariantCulture, out float sy))
+                {
+                    comp.transform.localScale = new Vector3(comp.transform.localScale.x, sy, comp.transform.localScale.z);
                 }
                 else if (key == "color" && ColorUtility.TryParseHtmlString(val, out Color c))
                 {
@@ -193,63 +303,66 @@ namespace PvZEcologyTranslator.Patches
                 foreach (Image img in allImages)
                 {
                     if (img == null || img.gameObject.scene.name == null) continue;
+                    if (img.gameObject.GetComponent<AnimationWatcher>() == null) img.gameObject.AddComponent<AnimationWatcher>();
+
                     if (img.gameObject.hideFlags == HideFlags.NotEditable || img.gameObject.hideFlags == HideFlags.HideAndDontSave) continue;
 
                     Sprite original = null;
-                    if (OriginalSpriteCache.TryGetValue(img, out Sprite cached))
-                    {
-                        original = cached;
-                    }
+                    if (OriginalSpriteCache.TryGetValue(img, out Sprite cached)) { original = cached; }
                     else
                     {
                         original = img.sprite;
-                        if (original != null && !original.name.EndsWith("_Translated"))
-                        {
-                            OriginalSpriteCache[img] = original;
-                        }
+                        if (original != null && !original.name.EndsWith("_Translated")) { OriginalSpriteCache[img] = original; }
                     }
 
                     if (original == null) continue;
                     Sprite val = original;
                     ProcessImage(img, ref val, true);
-                    if (img.sprite != val)
-                    {
-                        isApplyingTranslation = true;
-                        img.sprite = val;
-                        isApplyingTranslation = false;
-                    }
+                    if (img.sprite != val) { isApplyingTranslation = true; img.sprite = val; isApplyingTranslation = false; }
                 }
 
                 SpriteRenderer[] allSRs = Resources.FindObjectsOfTypeAll<SpriteRenderer>();
                 foreach (SpriteRenderer sr in allSRs)
                 {
                     if (sr == null || sr.gameObject.scene.name == null) continue;
+                    if (sr.gameObject.GetComponent<AnimationWatcher>() == null) sr.gameObject.AddComponent<AnimationWatcher>();
 
                     Sprite original = null;
-                    if (OriginalSpriteCache.TryGetValue(sr, out Sprite cached))
-                    {
-                        original = cached;
-                    }
+                    if (OriginalSpriteCache.TryGetValue(sr, out Sprite cached)) { original = cached; }
                     else
                     {
                         original = sr.sprite;
-                        if (original != null && !original.name.EndsWith("_Translated"))
-                        {
-                            OriginalSpriteCache[sr] = original;
-                        }
+                        if (original != null && !original.name.EndsWith("_Translated")) { OriginalSpriteCache[sr] = original; }
                     }
 
                     if (original == null) continue;
                     Sprite val = original;
                     ProcessImage(sr, ref val, true);
-                    if (sr.sprite != val)
+                    if (sr.sprite != val) { isApplyingTranslation = true; sr.sprite = val; isApplyingTranslation = false; }
+                }
+
+                ParticleSystemRenderer[] allPSRs = Resources.FindObjectsOfTypeAll<ParticleSystemRenderer>();
+                foreach (ParticleSystemRenderer psr in allPSRs)
+                {
+                    if (psr == null || psr.gameObject.scene.name == null) continue;
+                    if (psr.gameObject.GetComponent<AnimationWatcher>() == null) psr.gameObject.AddComponent<AnimationWatcher>();
+
+                    if (psr.sharedMaterial != null && psr.sharedMaterial.mainTexture != null)
                     {
-                        isApplyingTranslation = true;
-                        sr.sprite = val;
-                        isApplyingTranslation = false;
+                        Texture tex = psr.sharedMaterial.mainTexture;
+                        if (!tex.name.EndsWith("_Translated"))
+                        {
+                            string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                            if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                            {
+                                customTex.name = cleanName + "_Translated";
+                                psr.sharedMaterial.mainTexture = customTex;
+                            }
+                        }
                     }
                 }
-                Main.Log.LogInfo("[ImagePatch] All images & textures successfully refreshed (F6).");
+
+                Main.Log.LogInfo("[ImagePatch] All images, sprites, and particles successfully refreshed (F6).");
             }
             catch (System.Exception ex)
             {

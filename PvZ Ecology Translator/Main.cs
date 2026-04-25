@@ -10,13 +10,13 @@ using PvZEcologyTranslator.Features;
 
 namespace PvZEcologyTranslator
 {
-    // [UPDATE VERSI 0.2.0] Major UI Overrides Update & Smart Path
+    // [UPDATE VERSI 0.3.0] Pembaruan Versi Mod & Registrasi Input Path Detector
     // Penulisan versi di-hardcode di atribut untuk mencegah error compiler C# pada Unity lawas
-    [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", "0.2.0")]
+    [BepInPlugin("com.ilhamgimank.pvzecology.translator", "PvZ Ecology Translator", "0.3.0")]
     public class Main : BaseUnityPlugin
     {
         // Variabel versi mod yang dipanggil oleh DeveloperMenu.cs (Ini yang menyelesaikan error ModVersion)
-        public const string ModVersion = "0.2.0";
+        public const string ModVersion = "0.3.0";
 
         internal static Main Instance;
         public static ManualLogSource Log;

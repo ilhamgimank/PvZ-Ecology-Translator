@@ -13,80 +13,134 @@ namespace PvZEcologyTranslator.Features
         private ParticleSystemRenderer psr;
         private MeshRenderer mr;
 
+        private int lastImgSpriteId = 0;
+        private int lastSrSpriteId = 0;
+        private int lastPsrTexId = 0;
+        private int lastMrTexId = 0;
+
         void Awake()
         {
-            // Cache komponen di awal agar performa game tetap lancar
             img = GetComponent<Image>();
             sr = GetComponent<SpriteRenderer>();
             psr = GetComponent<ParticleSystemRenderer>();
             mr = GetComponent<MeshRenderer>();
         }
 
-        // Jalankan pelacakan di setiap tahap penggambaran frame
+        // [FITUR BARU 1] Eksekusi instan seketika saat objek didaur ulang dari kolam memori (Object Pool)!
+        void OnEnable() { ForceReplaceSprite(); }
+
+        // [FITUR BARU 2] Eksekusi di awal frame untuk mengimbangi kecepatan Animator game!
         void Update() { ForceReplaceSprite(); }
+
+        // Eksekusi pelapis di akhir frame 
         void LateUpdate() { ForceReplaceSprite(); }
-        void OnWillRenderObject() { ForceReplaceSprite(); }
 
         private void ForceReplaceSprite()
         {
-            // Mencari ulang komponen jaga-jaga jika skrip game menambahkannya belakangan
-            if (img == null) img = GetComponent<Image>();
-            if (sr == null) sr = GetComponent<SpriteRenderer>();
-            if (psr == null) psr = GetComponent<ParticleSystemRenderer>();
-            if (mr == null) mr = GetComponent<MeshRenderer>();
-
             // 1. Cek UI Image standar
             if (img != null && img.sprite != null)
             {
-                Sprite s = img.sprite;
-                if (!s.name.EndsWith("_Translated"))
+                int currentId = img.sprite.GetInstanceID();
+                if (currentId != lastImgSpriteId)
                 {
-                    string cleanName = s.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
-                    Sprite translated = TextureManager.GetTranslatedSprite(s, cleanName);
-                    if (translated != null) img.sprite = translated;
-                }
-            }
+                    lastImgSpriteId = currentId;
+                    string sName = img.sprite.name;
 
-            // 2. Cek SpriteRenderer
-            if (sr != null && sr.sprite != null)
-            {
-                Sprite s = sr.sprite;
-                if (!s.name.EndsWith("_Translated"))
-                {
-                    string cleanName = s.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
-                    Sprite translated = TextureManager.GetTranslatedSprite(s, cleanName);
-                    if (translated != null) sr.sprite = translated;
-                }
-            }
-
-            // 3. [FITUR BARU] Cek Particle System (Efek Ledakan Doom, Spudow, Sproing!)
-            if (psr != null && psr.material != null && psr.material.mainTexture != null)
-            {
-                Texture tex = psr.material.mainTexture;
-                if (!tex.name.EndsWith("_Translated"))
-                {
-                    string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
-
-                    // Particle System menggunakan Texture2D murni, bukan Sprite.
-                    if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                    if (TextureManager.EnableTextureDumper && !sName.EndsWith("_Translated"))
                     {
-                        customTex.name = cleanName + "_Translated";
-                        psr.material.mainTexture = customTex; // Timpa material partikel!
+                        TextureManager.DumpSprite(img.sprite);
+                    }
+
+                    if (!sName.EndsWith("_Translated"))
+                    {
+                        string cleanName = sName.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                        Sprite translated = TextureManager.GetTranslatedSprite(img.sprite, cleanName);
+                        if (translated != null)
+                        {
+                            img.sprite = translated;
+                            lastImgSpriteId = translated.GetInstanceID();
+                        }
                     }
                 }
             }
 
-            // 4. [FITUR BARU] Cek MeshRenderer (Untuk objek 3D datar klasik)
-            if (mr != null && mr.material != null && mr.material.mainTexture != null)
+            // 2. Cek SpriteRenderer (Objek 2D Dunia / Frame Ledakan)
+            if (sr != null && sr.sprite != null)
             {
-                Texture tex = mr.material.mainTexture;
-                if (!tex.name.EndsWith("_Translated"))
+                int currentId = sr.sprite.GetInstanceID();
+                if (currentId != lastSrSpriteId)
                 {
-                    string cleanName = tex.name.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
-                    if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                    lastSrSpriteId = currentId;
+                    string sName = sr.sprite.name;
+
+                    if (TextureManager.EnableTextureDumper && !sName.EndsWith("_Translated"))
                     {
-                        customTex.name = cleanName + "_Translated";
-                        mr.material.mainTexture = customTex;
+                        TextureManager.DumpSprite(sr.sprite);
+                    }
+
+                    if (!sName.EndsWith("_Translated"))
+                    {
+                        string cleanName = sName.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+                        Sprite translated = TextureManager.GetTranslatedSprite(sr.sprite, cleanName);
+                        if (translated != null)
+                        {
+                            sr.sprite = translated;
+                            lastSrSpriteId = translated.GetInstanceID();
+                        }
+                    }
+                }
+            }
+
+            // 3. Cek Particle System (Efek Ledakan Doom, Spudow, Sproing!)
+            if (psr != null && psr.sharedMaterial != null && psr.sharedMaterial.mainTexture != null)
+            {
+                int currentId = psr.sharedMaterial.mainTexture.GetInstanceID();
+                if (currentId != lastPsrTexId)
+                {
+                    lastPsrTexId = currentId;
+                    string texName = psr.sharedMaterial.mainTexture.name;
+                    string cleanName = texName.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+
+                    if (TextureManager.EnableTextureDumper && !texName.EndsWith("_Translated"))
+                    {
+                        TextureManager.DumpTexture2D(psr.sharedMaterial.mainTexture, cleanName);
+                    }
+
+                    if (!texName.EndsWith("_Translated"))
+                    {
+                        if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                        {
+                            customTex.name = cleanName + "_Translated";
+                            psr.sharedMaterial.mainTexture = customTex;
+                            lastPsrTexId = customTex.GetInstanceID();
+                        }
+                    }
+                }
+            }
+
+            // 4. Cek MeshRenderer (Untuk objek 3D datar klasik)
+            if (mr != null && mr.sharedMaterial != null && mr.sharedMaterial.mainTexture != null)
+            {
+                int currentId = mr.sharedMaterial.mainTexture.GetInstanceID();
+                if (currentId != lastMrTexId)
+                {
+                    lastMrTexId = currentId;
+                    string texName = mr.sharedMaterial.mainTexture.name;
+                    string cleanName = texName.Replace("(Clone)", "").Replace("(Instance)", "").Trim();
+
+                    if (TextureManager.EnableTextureDumper && !texName.EndsWith("_Translated"))
+                    {
+                        TextureManager.DumpTexture2D(mr.sharedMaterial.mainTexture, cleanName);
+                    }
+
+                    if (!texName.EndsWith("_Translated"))
+                    {
+                        if (TextureManager.CustomTextures.TryGetValue(cleanName, out Texture2D customTex))
+                        {
+                            customTex.name = cleanName + "_Translated";
+                            mr.sharedMaterial.mainTexture = customTex;
+                            lastMrTexId = customTex.GetInstanceID();
+                        }
                     }
                 }
             }
