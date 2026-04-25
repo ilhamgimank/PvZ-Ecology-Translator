@@ -1,6 +1,6 @@
 # 🌻 PvZ Ecology Translator Mod
 
-![Mod Version](https://img.shields.io/badge/Version-0.2.0-brightgreen?style=for-the-badge)
+![Mod Version](https://img.shields.io/badge/Version-0.3.0-brightgreen?style=for-the-badge)
 ![BepInEx](https://img.shields.io/badge/Requires-BepInEx_5-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey?style=for-the-badge)
 
@@ -62,6 +62,7 @@ Press **F12** in-game to open a dedicated Developer GUI panel:
 The release `.zip` file includes the `.dll` mod along with pre-configured translation folders. The currently available default languages are:
 * 🇬🇧 **English**
 * 🇮🇩 **Indonesian**
+* 🇪🇸 **Espanol**
 
 > **Want to request another language?** Feel free to request it by sending me a DM on Discord!
 
